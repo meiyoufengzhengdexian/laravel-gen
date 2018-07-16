@@ -8,7 +8,7 @@ export default {
     createUrl: '/admin/{{ lcfirst($basicInfo['model_name']) }}',
     list: [],
     new{{ $basicInfo['model_name'] }}: {},
-    cate: {},
+    {{$basicInfo['model_name']}}: {},
     loading: false,
     page: {
       total: 0,
@@ -41,11 +41,11 @@ export default {
     resetCreate(state) {
       state.new{{ $basicInfo['model_name'] }} = {};
     },
-    setCate(state, {{ lcfirst($basicInfo['model_name']) }}) {
-      state.{{ lcfirst($basicInfo['model_name']) }} = {{ lcfirst($basicInfo['model_name']) }};
+    set{{$basicInfo['model_name']}}(state, {{ $basicInfo['model_name'] }}) {
+      state.{{ $basicInfo['model_name'] }} = {{ $basicInfo['model_name'] }};
     },
-    resetCate(state) {
-      state.{{ lcfirst($basicInfo['model_name']) }} = {}
+    reset{{$basicInfo['model_name']}}(state) {
+      state.{{ $basicInfo['model_name'] }} = {}
     }
   },
   actions: {
@@ -123,23 +123,23 @@ export default {
     /**
      * 更新
      * @param context
-     * @param cate
+     * @param {{$basicInfo['model_name']}}
      * @returns {Promise<any>}
      */
-    update(context, {{ lcfirst($basicInfo['model_name']) }}) {
+    update(context) {
       return new Promise((success, faild) => {
-        http.putData(context.state.url + '/' + {{ lcfirst($basicInfo['model_name']) }}.id, cate)
+        http.putData(context.state.url + '/' + context.state.{{ $basicInfo['model_name'] }}.id, context.state.{{$basicInfo['model_name']}})
           .then(res => {
             success(res.data)
           }).catch(faild)
         ;
       })
     },
-    destory(context, {{ lcfirst($basicInfo['model_name']) }}) {
+    destory(context, {{ $basicInfo['model_name'] }}) {
       MessageBox.confirm('确定要删除此数据？')
         .then(_ => {
           context.commit('loading');
-          http.deleteData(context.state.url + '/' + {{ lcfirst($basicInfo['model_name']) }}.id).then(res => {
+          http.deleteData(context.state.url + '/' + {{ $basicInfo['model_name'] }}.id).then(res => {
             context.dispatch('getList');
           })
         })

@@ -27,5 +27,8 @@ Route::group([
     Route::post('genRequest', 'TableController@genRequest');
     Route::post('genController', 'TableController@genController');
     Route::post('genStoreModule', 'TableController@genStoreModule');
+    Route::post('genListComponents', 'TableController@genListComponents');
+    Route::post('genCreateComponent', 'TableController@genCreateComponent');
+    Route::post('genEditComponent', 'TableController@genEditComponent');
 
 });

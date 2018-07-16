@@ -50,7 +50,7 @@ class TableController extends Controller
                 $field = new Field();
                 $type = Schema::getColumnType($name, $fieldName);
                 $field->name = $fieldName;
-                $field->lable = $fieldName;
+                $field->label = $fieldName;
                 $field->type = $type;
                 $field->show_type = $type;
                 $field->search = 1;
@@ -242,15 +242,192 @@ class TableController extends Controller
         $storeFileName = $storeDir .'/'. $basicInfo['view_name']. '.js';
         file_put_contents($storeFileName, $StoreContent);
 
+        // vuex hook
+
+        if(file_exists(env('Vue_Home'). '/src/vuex/index.js')){
+            $vuexIndexContent = file_get_contents(env('Vue_Home'). '/src/vuex/index.js');
+            // 查找文件中是否存已经在import
+            $import = "import $basicInfo[view_name] from './modules/admin/$basicInfo[view_name]";
+            if(strpos($import, $vuexIndexContent) === false){
+                $vuexIndexContent = str_replace('//import hook',
+                    $import."\r\n//import hook", $vuexIndexContent);
+                file_put_contents(env('Vue_Home'). '/src/vuex/index.js', $vuexIndexContent);
+            }
+        }else{
+            return [
+                'result'=>new Result(true, '前端store代码生成成功， 但是未找到vuex/index.js, 未添加vuex代码'),
+                'next'=>'/genListComponents'
+            ];
+        }
+
+
         return [
-            'result'=>new Result(true, '控制器生成成功'),
-            'next'=>'/genComponents'
+            'result'=>new Result(true, '前端vuex生成成功'),
+            'next'=>'/genListComponents'
         ];
     }
 
-    public function genComponents(Request $request)
+    public function genListComponents(Request $request)
     {
+        $tableName = $request->table_name;
+        $basicInfo = $request->basic_info;
+        $fields = $request->fields;
+        $listDir = env('Vue_Home').'/src/components/admin/'.$basicInfo['view_name'];
 
+        $listContent = view('code.list',
+                compact('tableName', 'basicInfo', 'fields'))->__toString();
+
+        if(!is_dir($listDir)){
+            mkdir($listDir, '0755');
+        }
+
+        $listFileName = $listDir .'/'. $basicInfo['model_name']. '.vue';
+
+
+        file_put_contents($listFileName, $listContent);
+
+        //router hook
+        if(file_exists(env('Vue_Home'). '/src/router/admin.js')){
+            $vueRuterAdminIndexContent = file_get_contents(env('Vue_Home'). '/src/router/admin.js');
+            // 查找文件中是否存已经在import
+            $search = "component: $basicInfo[model_name]";
+            $router = <<<ROUTER
+      {
+        path: '/admin/$basicInfo[view_name]',
+        name: '$basicInfo[model_name]',
+        component: $basicInfo[model_name],
+      },
+      //router hook
+ROUTER;
+
+            if(strpos($search, $vueRuterAdminIndexContent) === false){
+                $vueRuterAdminIndexContent = str_replace('//router hook',
+                    $router, $vueRuterAdminIndexContent);
+                file_put_contents(env('Vue_Home'). '/src/router/admin.js', $vueRuterAdminIndexContent);
+            }
+        }else{
+            return [
+                'result'=>new Result(true, '前端store代码生成成功， 但是未找到vuex/index.js, 未添加vuex代码'),
+                'next'=>'/genCreateComponent'
+            ];
+        }
+
+
+        return [
+            'result'=>new Result(true, '模型生成成功'),
+            'next'=>'/genCreateComponent'
+        ];
     }
 
+    public function genCreateComponent(Request $request)
+    {
+        $tableName = $request->table_name;
+        $basicInfo = $request->basic_info;
+        $fields = $request->fields;
+        $createDir = env('Vue_Home').'/src/components/admin/'.$basicInfo['view_name'];
+
+
+        foreach($fields as $field){
+            if(!isset($field['label'])){
+                dd($field);
+
+            }
+        }
+
+        $createContent = view('code.create',
+            compact('tableName', 'basicInfo', 'fields'))->__toString();
+
+        if(!is_dir($createDir)){
+            mkdir($createDir, '0755');
+        }
+
+        $listFileName = $createDir .'/'. $basicInfo['model_name']. 'Create.vue';
+
+
+        file_put_contents($listFileName, $createContent);
+
+        //router hook
+        if(file_exists(env('Vue_Home'). '/src/router/admin.js')){
+            $vueRuterAdminIndexContent = file_get_contents(env('Vue_Home'). '/src/router/admin.js');
+            // 查找文件中是否存已经在import
+            $search = "component: $basicInfo[model_name]Create";
+            $router = <<<ROUTER
+      {
+        path: '/admin/$basicInfo[view_name]/create',
+        name: '$basicInfo[model_name]Create',
+        component: $basicInfo[model_name]Create,
+      },
+      //router hook
+ROUTER;
+
+            if(strpos($search, $vueRuterAdminIndexContent) === false){
+                $vueRuterAdminIndexContent = str_replace('//router hook',
+                    $router, $vueRuterAdminIndexContent);
+                file_put_contents(env('Vue_Home'). '/src/router/admin.js', $vueRuterAdminIndexContent);
+            }
+        }else{
+            return [
+                'result'=>new Result(true, '前端store代码生成成功， 但是未找到router/admin.js, 未添加router代码'),
+                'next'=>'/genEditComponent'
+            ];
+        }
+
+
+        return [
+            'result'=>new Result(true, "$basicInfo[model_name]组件生成成功"),
+            'next'=>'/genEditComponent'
+        ];
+    }
+
+    public function genEditComponent(Request $request)
+    {
+        $tableName = $request->table_name;
+        $basicInfo = $request->basic_info;
+        $fields = $request->fields;
+        $editDir = env('Vue_Home').'/src/components/admin/'.$basicInfo['view_name'];
+
+        $editContent = view('code.edit',
+            compact('tableName', 'basicInfo', 'fields'))->__toString();
+
+        if(!is_dir($editDir)){
+            mkdir($editDir, '0755');
+        }
+
+        $editFileName = $editDir .'/'. $basicInfo['model_name']. 'Edit.vue';
+
+
+        file_put_contents($editFileName, $editContent);
+
+        //router hook
+        if(file_exists(env('Vue_Home'). '/src/router/admin.js')){
+            $vueRuterAdminIndexContent = file_get_contents(env('Vue_Home'). '/src/router/admin.js');
+            // 查找文件中是否存已经在router
+            $search = "component: $basicInfo[model_name]Edit";
+            $router = <<<ROUTER
+      {
+        path: '/admin/$basicInfo[view_name]/edit',
+        name: '$basicInfo[model_name]Edit',
+        component: $basicInfo[model_name]Edit,
+      },
+      //router hook
+ROUTER;
+
+            if(strpos($search, $vueRuterAdminIndexContent) === false){
+                $vueRuterAdminIndexContent = str_replace('//router hook',
+                    $router, $vueRuterAdminIndexContent);
+                file_put_contents(env('Vue_Home'). '/src/router/admin.js', $vueRuterAdminIndexContent);
+            }
+        }else{
+            return [
+                'result'=>new Result(true, '前端edit代码生成成功， 但是未找到router/admin.js, 未添加router代码'),
+                'next'=>'/genCreateEdit'
+            ];
+        }
+
+
+        return [
+            'result'=>new Result(true, "$basicInfo[model_name]组件生成成功"),
+            'next'=>'/genCreateEdit'
+        ];
+    }
 }
