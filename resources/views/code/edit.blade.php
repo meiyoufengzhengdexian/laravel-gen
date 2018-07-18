@@ -37,6 +37,7 @@
         },
         data() {
             return {
+            {{$basicInfo['view_name']}}:{}
             }
         },
         computed: {

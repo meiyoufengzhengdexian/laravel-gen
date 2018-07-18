@@ -26,11 +26,7 @@ class cateController extends Controller
                                                                                             $cate_id = $request->input('cate_id', false);
                                                                                             $startCreatedAt = $request->input('startCreatedAt', false);
                         $endCreatedAt = $request->input('endCreatedAt', false);
-                                                                                        $startUpdatedAt = $request->input('startUpdatedAt', false);
-                        $endUpdatedAt = $request->input('endUpdatedAt', false);
-                                                                                        $startDeletedAt = $request->input('startDeletedAt', false);
-                        $endDeletedAt = $request->input('endDeletedAt', false);
-                                    
+                                                                            
                                                         
                     $id && $cate->where('id', $id);
                                                                                     
@@ -40,13 +36,7 @@ class cateController extends Controller
                                                                                     
                     $startCreatedAt && $cate->whereRaw("DATE_FORMAT(`created_at`, '%Y-%m-%d') >= ?", [$startCreatedAt]);
                     $endCreatedAt && $cate->whereRaw("DATE_FORMAT(`created_at`, '%Y-%m-%d') >= ?", [$endCreatedAt]);
-                                                                                    
-                    $startUpdatedAt && $cate->whereRaw("DATE_FORMAT(`updated_at`, '%Y-%m-%d') >= ?", [$startUpdatedAt]);
-                    $endUpdatedAt && $cate->whereRaw("DATE_FORMAT(`updated_at`, '%Y-%m-%d') >= ?", [$endUpdatedAt]);
-                                                                                    
-                    $startDeletedAt && $cate->whereRaw("DATE_FORMAT(`deleted_at`, '%Y-%m-%d') >= ?", [$startDeletedAt]);
-                    $endDeletedAt && $cate->whereRaw("DATE_FORMAT(`deleted_at`, '%Y-%m-%d') >= ?", [$endDeletedAt]);
-                                            //过滤End
+                                                                                    //过滤End
 
         //关联
         //关联End
@@ -120,7 +110,7 @@ class cateController extends Controller
 
         return [
             'result'=>new Result(true),
-            'cate'=>$$cate
+            'cate'=>$cate
         ];
     }
 

@@ -15,9 +15,11 @@
               v-loading="loading"
               element-loading-text="玩命加载中..."
             >
-              <el-table-column prop="id" label="ID"></el-table-column>
-              <el-table-column prop="name" label="名称"></el-table-column>
-              <el-table-column prop="created_at" label="创建日期"></el-table-column>
+                @foreach($fields as $field)
+                    @if($field['index'])
+                        <el-table-column prop="{{$field['name']}}" label="{{$field['label']}}"></el-table-column>
+                    @endif
+                @endforeach
               <el-table-column label="操作">
                 <template slot-scope="scope">
                   <el-button size="mini" type="primary" icon="el-icon-search" @click="show(scope.row)"></el-button>

@@ -121,7 +121,7 @@ class {{ $basicInfo['controller_name'] }} extends Controller
 
         return [
             'result'=>new Result(true),
-            '{{ lcfirst($basicInfo['model_name']) }}'=>$${{ lcfirst($basicInfo['model_name']) }}
+            '{{ lcfirst($basicInfo['model_name']) }}'=>${{ lcfirst($basicInfo['model_name']) }}
         ];
     }
 
