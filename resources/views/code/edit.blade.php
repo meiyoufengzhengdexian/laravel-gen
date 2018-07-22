@@ -8,11 +8,16 @@
                  ref="ruleForm"
                  label-position="right"
                  label-width="80px">
-
             @foreach($fields as $field)
-                @if($field['create'])
+                @if($field['show'])
+                    @if($field['is_ref'] && $field['ref_type'] == 'belongsTo')
+                        <el-form-item label="{{$field['label']}}" prop="{{ $field['name'] }}">
+                            <{{kebab_case($field['ref_class'].'Option')}} v-model="{{$basicInfo['model_name']}}.{{ $field['name'] }}"></{{kebab_case($field['ref_class']. 'Option')}}>
+                        </el-form-item>
+                    @else
                     @php($type=$field['show_type'])
                     {!!  \App\Lib\Code::$type($field['label'], $basicInfo['model_name'], $field['name'])  !!}
+                    @endif
                 @endif
             @endforeach
 
@@ -27,13 +32,25 @@
 <script>
     import {mapState} from 'vuex'
     import '@/static/test'
+        @foreach($fields as $field)
+        @if($field['is_ref'] && $field['ref_type'] == 'belongsTo')
+    import {{ ucfirst(camel_case($field['ref_method'].'Option')) }} from "../{{camel_case($field['ref_class'])}}/{{ ucfirst(camel_case($field['ref_method'].'Option')) }}";
+    @endif
+    @endforeach
 
     export default {
         name: "{{$basicInfo['model_name']}}Edit",
         props: {
             id: {
-                'required': true
+                required: true
             }
+        },
+        components: {
+            @foreach($fields as $field)
+            @if($field['is_ref'] && $field['ref_type'] == 'belongsTo')
+            {{ ucfirst(camel_case($field['ref_class'].'Option')) }}
+            @endif
+            @endforeach
         },
         data() {
             return {

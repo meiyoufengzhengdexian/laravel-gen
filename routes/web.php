@@ -11,11 +11,10 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+
+Route::get('phpinfo', function(){
+    phpinfo();
 });
-
-
 Route::group([
     'prefix'=>'code',
     'namespace'=>'Code'
@@ -28,6 +27,8 @@ Route::group([
     Route::post('genController', 'TableController@genController');
     Route::post('genStoreModule', 'TableController@genStoreModule');
     Route::post('genListComponents', 'TableController@genListComponents');
+    Route::post('genRefOptionComponent', 'TableController@genRefOptionComponent');
+    Route::post('genSearchComponent', 'TableController@genSearchComponent');
     Route::post('genCreateComponent', 'TableController@genCreateComponent');
     Route::post('genEditComponent', 'TableController@genEditComponent');
 

@@ -12,5 +12,8 @@ class Articel extends Model
     protected $connection = 'mysql';
     use SoftDeletes;
 
-                                                                                                                
+                            public function cate() {
+        return $this->belongsTo(Cate::class);
+    }
+                                                                                                
 }

@@ -5,7 +5,8 @@ use App\Http\Requests\ArticelCreateRequest;
 use App\Http\Requests\ArticelUpdateRequest;
 use App\Lib\Result;
 use App\Model\Articel;
-use Illuminate\Http\Request;
+        use App\Model\Cate;
+                                use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
@@ -27,9 +28,11 @@ class articelController extends Controller
                                                                                             $content = $request->input('content', false);
                                                                                             $desc = $request->input('desc', false);
                                                                                             $img = $request->input('img', false);
-                                                                                            $startDeletedAt = $request->input('startDeletedAt', false);
-                        $endDeletedAt = $request->input('endDeletedAt', false);
-                                                                            
+                                                                                                                $startCreatedAt = $request->input('startCreatedAt', false);
+                        $endCreatedAt = $request->input('endCreatedAt', false);
+                                                        
+        $articel = $articel->orderBy('id', 'desc');
+
                                                         
                     $id && $articel->where('id', $id);
                                                                                     
@@ -42,15 +45,15 @@ class articelController extends Controller
                     $desc && $articel->where('desc', $desc);
                                                                                     
                     $img && $articel->where('img', $img);
-                                                                                    
-                    $startDeletedAt && $articel->whereRaw("DATE_FORMAT(`deleted_at`, '%Y-%m-%d') >= ?", [$startDeletedAt]);
-                    $endDeletedAt && $articel->whereRaw("DATE_FORMAT(`deleted_at`, '%Y-%m-%d') >= ?", [$endDeletedAt]);
-                                                                                    //过滤End
+                                                                                                        
+                    $startCreatedAt && $articel->whereRaw("DATE_FORMAT(`created_at`, '%Y-%m-%d') >= ?", [$startCreatedAt]);
+                    $endCreatedAt && $articel->whereRaw("DATE_FORMAT(`created_at`, '%Y-%m-%d') >= ?", [$endCreatedAt]);
+                                                                //过滤End
 
         //关联
-        //关联End
+                                                        $articel->with('cate');
+                                                                                                                                                                        //关联End
 
-        $articel = $articel->orderBy('id', 'desc');
 
         if($isCvsDownload){
             $list = $articel->all();

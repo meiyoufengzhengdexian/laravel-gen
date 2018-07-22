@@ -32,17 +32,22 @@ class TableController extends Controller
     public function show($name, Request $request)
     {
         $table = Table::where('name', $name)->first();
-        if ($table && false) {
-            $basicInfo = [
-                'controller_name' => '',
-                'model_name' => '',
-                'view_name' => ''
+        if ($table) {
+            $basicInfo = $table;
+            $fields = $table->fields;
+            $fields->load('defaultValues');
+            $fields->load('fieldRules');
+
+            return [
+                'result' => new Result(true),
+                'fields' => $fields,
+                'basic_info' => $basicInfo
             ];
         } else {
             $basicInfo = [
                 'controller_name' => camel_case($name . 'Controller'),
                 'model_name' => ucfirst(camel_case($name)),
-                'view_name' => camel_case($name)
+                'view_name' => ($name)
             ];
             $fields = Schema::getColumnListing($name);
             $fieldres = collect();
@@ -53,10 +58,26 @@ class TableController extends Controller
                 $field->label = $fieldName;
                 $field->type = $type;
                 $field->show_type = $type;
-                $field->search = 1;
-                $field->index = 1;
-                $field->create = 1;
-                $field->show = 1;
+                if(!in_array($field['name'], ['deleted_at'])){
+                    $field->search = 1;
+                }else{
+                    $field->search = 0;
+                }
+                if(!in_array($field['name'], ['deleted_at', 'updated_at', 'created_at'])){
+                    $field->index = 1;
+                }else{
+                    $field->index = 0;
+                }
+                if(!in_array($field['name'], ['deleted_at', 'updated_at', 'created_at', 'id'])){
+                    $field->create = 1;
+                }else{
+                    $field->create = 0;
+                }
+                if(!in_array($field['name'], ['deleted_at', 'updated_at', 'created_at', 'id'])){
+                    $field->show = 1;
+                }else{
+                    $field->show = 0;
+                }
                 $field->is_ref = 0;
                 $field->ref_class = '';
                 $field->ref_method = '';
@@ -84,7 +105,7 @@ class TableController extends Controller
 
         $table = Table::updateOrCreate([
             'name' => $table,
-        ], $basicInfo);
+        ], collect($basicInfo)->only(['name', 'controller_name', 'model_name', 'view_name', 'label'])->toArray());
 
 
         $tableId = $table->id;
@@ -151,7 +172,7 @@ class TableController extends Controller
                 compact('tableName', 'basicInfo', 'fields'))->__toString();
 
         if (!is_dir($modelDir)) {
-            mkdir($modelDir, '0755');
+            mkdir($modelDir, 0755, true);
         }
 
         $modelFileName = $modelDir . '/' . $basicInfo['model_name'] . '.php';
@@ -186,7 +207,7 @@ class TableController extends Controller
                 compact('tableName', 'basicInfo', 'fields'))->__toString();
 
         if (!is_dir($RequestDir)) {
-            mkdir($RequestDir, '0755');
+            mkdir($RequestDir, 0755, true);
         }
 
         $createRequestFileName = $RequestDir . '/' . $basicInfo['model_name'] . 'CreateRequest.php';
@@ -213,7 +234,7 @@ class TableController extends Controller
                 compact('tableName', 'basicInfo', 'fields'))->__toString();
 
         if (!is_dir($controllerDir)) {
-            mkdir($controllerDir, '0755');
+            mkdir($controllerDir, 0755, true);
         }
 
         $controllerFileName = $controllerDir . '/' . $basicInfo['controller_name'] . '.php';
@@ -227,7 +248,7 @@ class TableController extends Controller
 
     public function genStoreModule(Request $request)
     {
-        $storeDir = env('Vue_Home') . '/src/vuex/modules/admin';
+        $storeDir = config('app.Vue_Home') . '/src/vuex/modules/admin';
         $tableName = $request->table_name;
         $basicInfo = $request->basic_info;
         $fields = $request->fields;
@@ -236,7 +257,7 @@ class TableController extends Controller
             compact('tableName', 'basicInfo', 'fields'))->__toString();
 
         if (!is_dir($storeDir)) {
-            mkdir($storeDir, '0755');
+            mkdir($storeDir, 0755, true);
         }
 
         $storeFileName = $storeDir . '/' . $basicInfo['view_name'] . '.js';
@@ -244,8 +265,8 @@ class TableController extends Controller
 
         // vuex hook
 
-        if (file_exists(env('Vue_Home') . '/src/vuex/index.js')) {
-            $vuexIndexContent = file_get_contents(env('Vue_Home') . '/src/vuex/index.js');
+        if (file_exists(config('app.Vue_Home') . '/src/vuex/index.js')) {
+            $vuexIndexContent = file_get_contents(config('app.Vue_Home') . '/src/vuex/index.js');
             // 查找文件中是否存已经在import
             $import = "import $basicInfo[view_name] from './modules/admin/$basicInfo[view_name]'";
             if (strpos($vuexIndexContent, $import) === false) {
@@ -254,12 +275,12 @@ class TableController extends Controller
             }
 
             $module = "$basicInfo[view_name],";
-            if(strpos($vuexIndexContent, $module) ===  false){
+            if (strpos($vuexIndexContent, $module) === false) {
                 $vuexIndexContent = str_replace('//modules hook',
                     $module . "\r\n//modules hook", $vuexIndexContent);
             }
 
-            file_put_contents(env('Vue_Home') . '/src/vuex/index.js', $vuexIndexContent);
+            file_put_contents(config('app.Vue_Home') . '/src/vuex/index.js', $vuexIndexContent);
 
         } else {
             return [
@@ -280,13 +301,13 @@ class TableController extends Controller
         $tableName = $request->table_name;
         $basicInfo = $request->basic_info;
         $fields = $request->fields;
-        $listDir = env('Vue_Home') . '/src/components/admin/' . $basicInfo['view_name'];
+        $listDir = config('app.Vue_Home') . '/src/components/admin/' . $basicInfo['view_name'];
 
         $listContent = view('code.list',
             compact('tableName', 'basicInfo', 'fields'))->__toString();
 
         if (!is_dir($listDir)) {
-            mkdir($listDir, '0755');
+            mkdir($listDir, 0755, true);
         }
 
         $listFileName = $listDir . '/' . $basicInfo['model_name'] . '.vue';
@@ -296,14 +317,14 @@ class TableController extends Controller
 
 
         //router hook
-        if (file_exists(env('Vue_Home') . '/src/router/admin.js')) {
-            $vueRuterAdminIndexContent = file_get_contents(env('Vue_Home') . '/src/router/admin.js');
+        if (file_exists(config('app.Vue_Home') . '/src/router/admin.js')) {
+            $vueRuterAdminIndexContent = file_get_contents(config('app.Vue_Home') . '/src/router/admin.js');
             // 查找文件中是否存已经在import
             $import = "import $basicInfo[model_name] from '@/components/admin/$basicInfo[view_name]/$basicInfo[model_name]'";
 
-            if(strpos($vueRuterAdminIndexContent, $import) === false){
+            if (strpos($vueRuterAdminIndexContent, $import) === false) {
                 $vueRuterAdminIndexContent = str_replace("//import hook",
-                    $import. "\r\n//import hook", $vueRuterAdminIndexContent);
+                    $import . "\r\n//import hook", $vueRuterAdminIndexContent);
             }
             //查找文件是否已经存在路由
             $search = $search = "name: '{$basicInfo['model_name']}'";
@@ -319,18 +340,73 @@ ROUTER;
             if (strpos($vueRuterAdminIndexContent, $search) === false) {
                 $vueRuterAdminIndexContent = str_replace('//router hook',
                     $router, $vueRuterAdminIndexContent);
-                file_put_contents(env('Vue_Home') . '/src/router/admin.js', $vueRuterAdminIndexContent);
+                file_put_contents(config('app.Vue_Home') . '/src/router/admin.js', $vueRuterAdminIndexContent);
             }
         } else {
             return [
                 'result' => new Result(true, '前端store代码生成成功， 但是未找到vuex/index.js, 未添加vuex代码'),
-                'next' => '/genCreateComponent'
+                'next' => '/genRefOptionComponent'
             ];
         }
 
 
         return [
             'result' => new Result(true, '模型生成成功'),
+            'next' => '/genRefOptionComponent'
+        ];
+    }
+
+
+    public function genRefOptionComponent(Request $request)
+    {
+        $tableName = $request->table_name;
+        $basicInfo = $request->basic_info;
+        $fields = $request->fields;
+        $dir = config('app.Vue_Home') . '/src/components/admin/' . $basicInfo['view_name'];
+
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        foreach ($fields as $field) {
+            if ($field['is_ref'] && $field['ref_type'] == 'belongsTo') {
+                $optionContent = view('code.option',
+                    compact('tableName', 'basicInfo', 'fields', 'field'))->__toString();
+                $refDir = config('app.Vue_Home').'/src/components/admin/'. camel_case($field['ref_class']);
+                if(!is_dir($refDir)){
+                    mkdir($refDir, 0755, true);
+                }
+                $listFileName = config('app.Vue_Home').'/src/components/admin/'. camel_case($field['ref_class']) . '/' . ucfirst(camel_case($field['ref_class'].'Option')) . '.vue';
+                file_put_contents($listFileName, $optionContent);
+            }
+        }
+
+        return [
+            'result' => new Result(true, '前端store代码生成成功， 但是未找到router/admin.js, 未添加router代码'),
+            'next' => '/genSearchComponent'
+        ];
+    }
+
+    public function genSearchComponent(Request $request)
+    {
+        $tableName = $request->table_name;
+        $basicInfo = $request->basic_info;
+        $fields = $request->fields;
+        $dir = config('app.Vue_Home') . '/src/components/admin/' . $basicInfo['view_name'];
+
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $searchContent = view('code.search',
+            compact('tableName', 'basicInfo', 'fields', 'field'))->__toString();
+
+        $searchFileName = config('app.Vue_Home').'/src/components/admin/'. camel_case($basicInfo['view_name']) . '/' . ucfirst(camel_case($basicInfo['model_name'].'Search')) . '.vue';
+
+        file_put_contents($searchFileName, $searchContent);
+
+        return [
+            'result' => new Result(true, '前端search代码生成成功'),
             'next' => '/genCreateComponent'
         ];
     }
@@ -340,7 +416,7 @@ ROUTER;
         $tableName = $request->table_name;
         $basicInfo = $request->basic_info;
         $fields = $request->fields;
-        $createDir = env('Vue_Home') . '/src/components/admin/' . $basicInfo['view_name'];
+        $createDir = config('app.Vue_Home') . '/src/components/admin/' . $basicInfo['view_name'];
 
 
         foreach ($fields as $field) {
@@ -354,7 +430,7 @@ ROUTER;
             compact('tableName', 'basicInfo', 'fields'))->__toString();
 
         if (!is_dir($createDir)) {
-            mkdir($createDir, '0755');
+            mkdir($createDir, 0755, true);
         }
 
         $listFileName = $createDir . '/' . $basicInfo['model_name'] . 'Create.vue';
@@ -363,16 +439,15 @@ ROUTER;
         file_put_contents($listFileName, $createContent);
 
         //router hook
-        if (file_exists(env('Vue_Home') . '/src/router/admin.js')) {
-            $vueRuterAdminIndexContent = file_get_contents(env('Vue_Home') . '/src/router/admin.js');
+        if (file_exists(config('app.Vue_Home') . '/src/router/admin.js')) {
+            $vueRuterAdminIndexContent = file_get_contents(config('app.Vue_Home') . '/src/router/admin.js');
             // 查找文件中是否存已经在import
             $import = "import $basicInfo[model_name]Create from '@/components/admin/$basicInfo[view_name]/$basicInfo[model_name]Create'";
 
-            if(strpos($vueRuterAdminIndexContent, $import) === false){
+            if (strpos($vueRuterAdminIndexContent, $import) === false) {
                 $vueRuterAdminIndexContent = str_replace("//import hook",
-                    $import. "\r\n//import hook", $vueRuterAdminIndexContent);
+                    $import . "\r\n//import hook", $vueRuterAdminIndexContent);
             }
-
 
             $search = $search = "name: '{$basicInfo['model_name']}Create'";
             $router = <<<ROUTER
@@ -387,7 +462,7 @@ ROUTER;
             if (strpos($vueRuterAdminIndexContent, $search) === false) {
                 $vueRuterAdminIndexContent = str_replace('//router hook',
                     $router, $vueRuterAdminIndexContent);
-                file_put_contents(env('Vue_Home') . '/src/router/admin.js', $vueRuterAdminIndexContent);
+                file_put_contents(config('app.Vue_Home') . '/src/router/admin.js', $vueRuterAdminIndexContent);
             }
         } else {
             return [
@@ -408,37 +483,37 @@ ROUTER;
         $tableName = $request->table_name;
         $basicInfo = $request->basic_info;
         $fields = $request->fields;
-        $editDir = env('Vue_Home') . '/src/components/admin/' . $basicInfo['view_name'];
+        $editDir = config('app.Vue_Home') . '/src/components/admin/' . $basicInfo['view_name'];
+
 
         $editContent = view('code.edit',
             compact('tableName', 'basicInfo', 'fields'))->__toString();
 
         if (!is_dir($editDir)) {
-            mkdir($editDir, '0755');
+            mkdir($editDir, 0755, true);
         }
 
         $editFileName = $editDir . '/' . $basicInfo['model_name'] . 'Edit.vue';
 
-
         file_put_contents($editFileName, $editContent);
 
         //router hook
-        if (file_exists(env('Vue_Home') . '/src/router/admin.js')) {
-            $vueRuterAdminIndexContent = file_get_contents(env('Vue_Home') . '/src/router/admin.js');
+        if (file_exists(config('app.Vue_Home') . '/src/router/admin.js')) {
+            $vueRuterAdminIndexContent = file_get_contents(config('app.Vue_Home') . '/src/router/admin.js');
 
             // 查找文件中是否存已经import
             $import = "import $basicInfo[model_name]Edit from '@/components/admin/$basicInfo[view_name]/$basicInfo[model_name]Edit'";
 
-            if(strpos($vueRuterAdminIndexContent, $import) === false){
+            if (strpos($vueRuterAdminIndexContent, $import) === false) {
                 $vueRuterAdminIndexContent = str_replace("//import hook",
-                    $import. "\r\n//import hook", $vueRuterAdminIndexContent);
+                    $import . "\r\n//import hook", $vueRuterAdminIndexContent);
             }
             // 查找文件中是否存已经在router
             //name: 'Cate'
             $search = "name: '{$basicInfo['model_name']}Edit'";
             $router = <<<ROUTER
       {
-        path: '/admin/$basicInfo[view_name]/edit',
+        path: '/admin/$basicInfo[view_name]/:id/edit',
         name: '$basicInfo[model_name]Edit',
         component: $basicInfo[model_name]Edit,
         props:true
@@ -449,7 +524,7 @@ ROUTER;
             if (strpos($vueRuterAdminIndexContent, $search) === false) {
                 $vueRuterAdminIndexContent = str_replace('//router hook',
                     $router, $vueRuterAdminIndexContent);
-                file_put_contents(env('Vue_Home') . '/src/router/admin.js', $vueRuterAdminIndexContent);
+                file_put_contents(config('app.Vue_Home') . '/src/router/admin.js', $vueRuterAdminIndexContent);
             }
         } else {
             return [

@@ -5,6 +5,11 @@ use App\Http\Requests\{{ $basicInfo['model_name'] }}CreateRequest;
 use App\Http\Requests\{{ $basicInfo['model_name'] }}UpdateRequest;
 use App\Lib\Result;
 use App\Model\{{ $basicInfo['model_name'] }};
+@foreach($fields as $field)
+    @if($field['is_ref'])
+use App\Model\{{ $field['ref_class'] }};
+    @endif
+@endforeach
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -32,6 +37,8 @@ class {{ $basicInfo['controller_name'] }} extends Controller
             @endif
         @endforeach
 
+        ${{ lcfirst($basicInfo['model_name']) }} = ${{ lcfirst($basicInfo['model_name']) }}->orderBy('id', 'desc');
+
         @foreach($fields as $field)
             @if($field['search'])
                 @if(!in_array($field['show_type'], ['datetime', 'checkbox']))
@@ -50,9 +57,13 @@ class {{ $basicInfo['controller_name'] }} extends Controller
         //过滤End
 
         //关联
+        @foreach($fields as $field)
+            @if($field['is_ref'])
+                ${{ lcfirst($basicInfo['model_name']) }}->with('{{$field['ref_method']}}');
+            @endif
+        @endforeach
         //关联End
 
-        ${{ lcfirst($basicInfo['model_name']) }} = ${{ lcfirst($basicInfo['model_name']) }}->orderBy('id', 'desc');
 
         if($isCvsDownload){
             $list = ${{ lcfirst($basicInfo['model_name']) }}->all();

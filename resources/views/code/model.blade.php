@@ -14,7 +14,7 @@ class {{$basicInfo['model_name']}} extends Model
     @foreach($fields as $field)
         @if($field['is_ref'] == 1)
     public function {{ $field['ref_method'] }}() {
-        $this->{{ $field['ref_type'] }}({{ $field['ref_class'] }}::class);
+        return $this->{{ $field['ref_type'] }}({{ $field['ref_class'] }}::class);
     }
         @endif
     @endforeach

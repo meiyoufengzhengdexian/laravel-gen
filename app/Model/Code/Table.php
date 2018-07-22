@@ -12,7 +12,7 @@ class Table extends Model
 
     public function fields()
     {
-        return $this->hasMany(Field::class);
+        return $this->hasMany(Field::class, 'gen_table_id');
     }
 
 }

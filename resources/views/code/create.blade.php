@@ -9,8 +9,14 @@
 
         @foreach($fields as $field)
             @if($field['create'])
-            @php($type=$field['show_type'])
-            {!!  \App\Lib\Code::$type($field['label'], $basicInfo['view_name'], $field['name'])  !!}
+                @if($field['is_ref'] && $field['ref_type'] == 'belongsTo')
+                    <el-form-item label="{{$field['label']}}" prop="{{ $field['name'] }}">
+                        <{{kebab_case($field['ref_class'].'Option')}} v-model="{{$basicInfo['view_name']}}.{{ $field['name'] }}"></{{kebab_case($field['ref_class']. 'Option')}}>
+                    </el-form-item>
+                @else
+                @php($type=$field['show_type'])
+                {!!  \App\Lib\Code::$type($field['label'], $basicInfo['view_name'], $field['name'])  !!}
+                @endif
             @endif
         @endforeach
 
@@ -25,10 +31,21 @@
 <script>
   import {mapState} from 'vuex'
   import back from '@/mixin/back'
-
+  @foreach($fields as $field)
+      @if($field['is_ref'] && $field['ref_type'] == 'belongsTo')
+      import {{ ucfirst(camel_case($field['ref_method'].'Option')) }} from "../{{camel_case($field['ref_class'])}}/{{ ucfirst(camel_case($field['ref_method'].'Option')) }}";
+      @endif
+  @endforeach
   export default {
     name: "{{$basicInfo['model_name']}}Create",
     mixins: [back],
+    components: {
+        @foreach($fields as $field)
+            @if($field['is_ref'] && $field['ref_type'] == 'belongsTo')
+        {{ ucfirst(camel_case($field['ref_class'].'Option')) }}
+        @endif
+        @endforeach
+    },
     computed: {
       ...mapState({
         {{$basicInfo["view_name"]}}: state => state.{{$basicInfo["view_name"]}}.new{{ $basicInfo['model_name'] }},

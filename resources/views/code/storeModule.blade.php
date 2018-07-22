@@ -24,6 +24,9 @@ export default {
     }
   },
   mutations: {
+        setSearch(state, search){
+        state.search = search;
+    },
     setList(state, data) {
       state.list = data;
       state.loading = false;

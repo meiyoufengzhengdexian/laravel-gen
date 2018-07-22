@@ -26,7 +26,15 @@ class ArticelUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-
+                        'id' => '',
+                        'cate_id' => '',
+                        'title' => '',
+                        'content' => '',
+                        'desc' => '',
+                        'img' => '',
+                        'deleted_at' => '',
+                        'created_at' => '',
+                        'updated_at' => '',
                     ];
     }
 
@@ -34,8 +42,7 @@ class ArticelUpdateRequest extends FormRequest
     public function messages()
     {
         return [
-
-                                    ];
+                                                                                                                                                                                                                                                                                ];
     }
 
     protected function failedAuthorization()
