@@ -18,7 +18,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 
-Route::resource('/admin/articel', 'Admin\\articelController');
-Route::resource('/admin/cate', 'Admin\\cateController');
+Route::resource('/admin/articel', 'Admin\articelController');
+Route::resource('/admin/cate', 'Admin\cateController');
 
 

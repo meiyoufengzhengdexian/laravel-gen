@@ -6,7 +6,7 @@
  * Time: 22:12
  */
 
-namespace App\Lib;
+namespace Lib;
 
 
 class Code
@@ -47,5 +47,18 @@ INTEGER;
     </el-date-picker>
 </el-form-item>
 INTEGER;
+    }
+
+    public static function switch($label, $model, $name)
+    {
+        return <<<SWITCH
+<el-form-item label="$label" prop="$name">
+        <el-switch
+                  v-model="$model.$name"
+                  :active-value="1"
+                  :inactive-value="0"
+        ></el-switch>
+</el-form-item>
+SWITCH;
     }
 }

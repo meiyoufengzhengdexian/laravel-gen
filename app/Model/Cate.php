@@ -12,5 +12,5 @@ class Cate extends Model
     protected $connection = 'mysql';
     use SoftDeletes;
 
-                                                                            
+                                                                                        
 }

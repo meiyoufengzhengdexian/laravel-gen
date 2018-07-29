@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Code;
 
-use App\Lib\Result;
+use Lib\Result;
 use App\Model\Code\DefaultValue;
 use App\Model\Code\Field;
 use App\Model\Code\FieldRule;

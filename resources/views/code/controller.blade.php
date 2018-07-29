@@ -3,7 +3,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\{{ $basicInfo['model_name'] }}CreateRequest;
 use App\Http\Requests\{{ $basicInfo['model_name'] }}UpdateRequest;
-use App\Lib\Result;
+use Lib\Result;
 use App\Model\{{ $basicInfo['model_name'] }};
 @foreach($fields as $field)
     @if($field['is_ref'])

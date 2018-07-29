@@ -15,7 +15,7 @@
                     </el-form-item>
                 @else
                 @php($type=$field['show_type'])
-                {!!  \App\Lib\Code::$type($field['label'], $basicInfo['view_name'], $field['name'])  !!}
+                {!!  \Lib\Code::$type($field['label'], $basicInfo['view_name'], $field['name'])  !!}
                 @endif
             @endif
         @endforeach

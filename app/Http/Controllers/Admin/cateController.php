@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\CateCreateRequest;
 use App\Http\Requests\CateUpdateRequest;
-use App\Lib\Result;
+use Lib\Fz\cate\src\CateRepostiory;
+use Lib\Result;
 use App\Model\Cate;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -17,29 +18,13 @@ class cateController extends Controller
      * @param  Cate $cate
      * @return  array|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Contracts\View\Factory|\Illuminate\View\View|\Symfony\Component\HttpFoundation\Response
      */
-    public function index(Request $request, Cate $cate)
+    public function index(Request $request, CateRepostiory $cateRepostiory)
     {
-        //过滤
-        $isCvsDownload = $request->input('isCvsDownload', false);
-        $all = $request->input('all', false);
-        $id = $request->input('id', false);
-        $name = $request->input('name', false);
-        $cate_id = $request->input('cate_id', false);
-        $startCreatedAt = $request->input('startCreatedAt', false);
-        $endCreatedAt = $request->input('endCreatedAt', false);
 
-        $id && $cate->where('id', $id);
-        $name && $cate->where('name', $name);
-        $cate_id && $cate->where('cate_id', $cate_id);
+        $isCvsDownload = $request->input('isCvsDownload');
+        $all = $request->input('all');
 
-        $startCreatedAt && $cate->whereRaw("DATE_FORMAT(`created_at`, '%Y-%m-%d') >= ?", [$startCreatedAt]);
-        $endCreatedAt && $cate->whereRaw("DATE_FORMAT(`created_at`, '%Y-%m-%d') >= ?", [$endCreatedAt]);
-        //过滤End
-
-        //关联
-        //关联End
-
-        $cate = $cate->orderBy('id', 'desc');
+        $cate = $cateRepostiory->search();
 
         if ($isCvsDownload) {
             $list = $cate->all();

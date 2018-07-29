@@ -6,9 +6,7 @@
  * Time: 9:19
  */
 
-namespace App\Lib;
-
-
+namespace Lib;
 
 class Result
 {

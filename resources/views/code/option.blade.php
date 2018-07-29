@@ -17,11 +17,10 @@
     name: "{{ camel_case($field['ref_method']) }}Option",
     props:{
         placeholder:{
-            default:'全部'
+            default:'请选择'
         },
         value:{
-            require:true,
-            type:Number
+            require:true
         }
     },
     data() {
@@ -30,6 +29,14 @@
           {{$field['name']}}: 0
       }
     },
+      watch: {
+          value(value) {
+              this.{{ $field['ref_method'] }}_id = value
+          },
+          {{ $field['ref_method'] }}_id(value) {
+              this.$emit('input', value)
+          }
+      },
     methods: {
       get{{camel_case($field['ref_method'])}}List (){
         let vthis = this;

@@ -4,11 +4,13 @@ namespace App;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Zizaco\Entrust\Traits\EntrustUserTrait;
 
-class User extends Authenticatable
+class Admin extends Authenticatable
 {
     use Notifiable;
-
+    use EntrustUserTrait;
+    protected $table = 'admin';
     /**
      * The attributes that are mass assignable.
      *

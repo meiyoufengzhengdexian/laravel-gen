@@ -22,7 +22,7 @@
                   </el-date-picker>
               @else
                   @php($type=$field['show_type'])
-                  {!!  \App\Lib\Code::$type($field['label'], 'searchForm', $field['name'])  !!}
+                  {!!  \Lib\Code::$type($field['label'], 'searchForm', $field['name'])  !!}
               @endif
           @endif
       @endforeach

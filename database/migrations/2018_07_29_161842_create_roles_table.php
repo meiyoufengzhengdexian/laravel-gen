@@ -1,0 +1,1 @@
+migrations/2018_07_29_161842_create_migrations_table.php

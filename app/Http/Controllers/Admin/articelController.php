@@ -3,7 +3,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Requests\ArticelCreateRequest;
 use App\Http\Requests\ArticelUpdateRequest;
-use App\Lib\Result;
+use Lib\Result;
 use App\Model\Articel;
         use App\Model\Cate;
                                 use Illuminate\Http\Request;
