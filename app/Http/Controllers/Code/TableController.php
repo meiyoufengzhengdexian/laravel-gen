@@ -17,6 +17,7 @@ class TableController extends Controller
     public function index(Request $request)
     {
         $tables = DB::select('show tables');
+
         return [
             'result' => new Result(true),
             'list' => $tables
